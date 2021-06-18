@@ -3,6 +3,12 @@ import os
 import pandas as pd
 import sys
 
+import multiprocessing as mp
+from multiprocessing import Pool
+
+
+bin_path = "../build/"
+
 # a function to run a command and
 # parse the output.
 def run_command(cmd):
@@ -34,6 +40,39 @@ def run_command(cmd):
 
     return res
 
+def generate_cs_mesh(res, filename):
+    return
+
+def generate_ico_mesh(res, filename, dual=False):
+    return
+
+def generate_rll_mesh(res, filename):
+    return
+
+def generate_overlap_mesh(inpfname1, inpfname2, method, outfname):
+    command = []
+    command.append(bin_path+"GenerateOverlapMesh")
+    command.append("--a")
+    command.append(inpfname1)
+    command.append("--b")
+    command.append(inpfname2)
+    command.append("--method")
+    command.append("exact")
+
+    return command
+
+# order: list with 2 entries that is strtictly above 0: FV (1:4), SE==4
+# methods: list with 2 entries specifying one of fv, cgll, dgll
+def generate_offline_map(inpfname1, inpfname2, inpoverlapmesh, outputmap, orders, methods, correct_areas, monotone):
+    return
+
+def generate_test_data(inpfname, testname, variablename):
+
+    return
+
+def apply_offline_map(mapfile, inputdatafile, variablename):
+    return
+
 def parse_help(res):
     opts = []
     for i in range(1, len(res) - 1):
@@ -43,7 +82,7 @@ def parse_help(res):
       if a != -1:
         opt = line.partition("--")[2].split()[0]
         opts.append(opt)
-        print("line is", opt)
+        # print("line is", opt)
 
     return opts
 
@@ -81,25 +120,37 @@ def build_mesh_args1(meshstr):
     return command, args, filename
 
 
+# Worklow
+## Parse ini file: compute unique CS, ICO, ICOD, RLL res
+## Generate the mesh
+## Generate test data if in source
+## wait
+
+# Do the apply regression workflow
+## Generate overlap mesh
+## Generate offline map
+## Apply offline map
+## Compare against baseline
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: \npython regression_tests.py <location of executables>\n\n")
         exit()
-    path = sys.argv[1] + "/"
+
+    bin_path = sys.argv[1] + "/"
 
     # These option are availble for checking and extending this regression testing commandline options
-    res = run_command('../build/GenerateCSMesh')
+    res = run_command(bin_path+'GenerateCSMesh')
     gCSMesh_tokens = parse_help(res)
-    res = run_command('../build/GenerateICOMesh')
+    res = run_command(bin_path+'GenerateICOMesh')
     gICOMesh_tokens = parse_help(res)
-    res = run_command('../build/GenerateOverlapMesh')
+    res = run_command(bin_path+'GenerateOverlapMesh')
     gOverlapMesh_tokens = parse_help(res)
-    res = run_command('../build/GenerateOfflineMap')
+    res = run_command(bin_path+'GenerateOfflineMap')
     gOfflineMap_tokens = parse_help(res)
-    res = run_command('../build/GenerateTestData')
+    res = run_command(bin_path+'GenerateTestData')
     gTestData_tokens = parse_help(res)
-    res = run_command('../build/ApplyOfflineMap')
+    res = run_command(bin_path+'ApplyOfflineMap')
     gApplyOfflineMap_tokens = parse_help(res)
 
     # Run a pipeline
@@ -107,7 +158,7 @@ if __name__ == '__main__':
     command = []
     args=[]
     # space seperated table with keywords
-    tm = pd.read_table('./test_matrix.ini', delim_whitespace=True)
+    tm = pd.read_table('./test_matrix.ini', delim_whitespace=True, comment='#')
 
     # figure out order of commands to call
     # For each pipeline:
