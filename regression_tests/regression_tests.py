@@ -481,7 +481,10 @@ if __name__ == '__main__':
 
         populate_timing_data(mesh_cmds[count], timeDelta, splitLoc)
         count=count+1
-
+        if verbose:
+            print("\n===================================\n")
+            print(result)
+            print("\n===================================\n")
         results.append(result)
         success.append(ss)
     check_error(success)
@@ -494,6 +497,10 @@ if __name__ == '__main__':
 
        populate_timing_data(generate_test_cmds[count], timeDelta, splitLoc)
        count=count+1
+       if verbose:
+           print("\n===================================\n")
+           print(result)
+           print("\n===================================\n")
        results.append(result)
        success.append(ss)    
     check_error(success)
@@ -506,6 +513,10 @@ if __name__ == '__main__':
 
        populate_timing_data(overlap_test_cmds[count], timeDelta, splitLoc)
        count=count+1
+       if verbose:
+           print("\n===================================\n")
+           print(result)
+           print("\n===================================\n")
        results.append(result)
        success.append(ss)    
     check_error(success)
@@ -518,6 +529,10 @@ if __name__ == '__main__':
 
        populate_timing_data(g_offmap_cmds[count], timeDelta, splitLoc)
        count=count+1
+       if verbose:
+           print("\n===================================\n")
+           print(result)
+           print("\n===================================\n")
        results.append(result)
        success.append(ss)    
     check_error(success)
@@ -530,6 +545,10 @@ if __name__ == '__main__':
 
        populate_timing_data(a_offmap_cmds[count], timeDelta, splitLoc)
        count=count+1
+       if verbose:
+           print("\n===================================\n")
+           print(result)
+           print("\n===================================\n")
        results.append(result)
        success.append(ss)       
     check_error(success)
