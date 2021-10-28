@@ -27,34 +27,39 @@ regression_dict = {'id': [], 'source': [], 'target': [], 'error': []}
 timing_dict = {'command':[], 'average_time': [], 'num_runs': []}
 time_pkl_file = baseline_path+'timing_data.pkl'
 
-objects = []
+timing_objects = []
 generate_baseline = False
+baseline_average = False
 
 exitsTimeFile = True
-#  Open timingfile
-try:
-    time_file = pickle.load(open(time_pkl_file, 'rb+'))
-
-    with (open(time_pkl_file , "rb+")) as openfile:
-        while True:
+def open_timingfile(baseline_average):
+    #  Open timingfile
+    df_timingfile=[]
+    try:
+        time_file = pickle.load(open(time_pkl_file, 'rb+'))
+        if baseline_average == False:
+            time_file = open(time_pkl_file, 'wb')
+        else:
+            with (open(time_pkl_file , "rb+")) as openfile:
+                while True:
+                    try:
+                        timing_objects.append(pickle.load(openfile))
+                    except EOFError:
+                        break
+                df_timingfile = timing_objects[0]
+                print("opened existing timing file: ", time_pkl_file)
+    except (OSError, EOFError, IOError) as e:
+        exitsTimeFile = False
+        print("opening new file")
+        if not os.path.exists(os.path.dirname(time_pkl_file)):
             try:
-                objects.append(pickle.load(openfile))
-            except EOFError:
-                break
-    df_timingfile = objects[0]
-    print("opened existing timing file: ", time_pkl_file)
-
-except (OSError, EOFError, IOError) as e:
-
-    exitsTimeFile = False
-    print("opening new file")
-    if not os.path.exists(os.path.dirname(time_pkl_file)):
-        try:
-            os.makedirs(os.path.dirname(time_pkl_file))
-        except OSError as exec: 
-            if exec.errno != errno.EEXIST:
-                raise
-    time_file = open(time_pkl_file, 'wb')
+                os.makedirs(os.path.dirname(time_pkl_file))
+            except OSError as exec: 
+                if exec.errno != errno.EEXIST:
+                    raise
+        time_file = open(time_pkl_file, 'wb')
+    
+    return time_file, timing_objects, df_timingfile
 
 
 def populate_timing_data(cmd, t, loc):
@@ -67,13 +72,18 @@ def populate_timing_data(cmd, t, loc):
         mycmd+=cmd[j]+" "
 
     # timing file is created from the first time object read from timing file is empty
-    if objects == []:
+    if timing_objects == []:
         timing_dict['command'].append(mycmd)
         timing_dict['average_time'].append(t)
         timing_dict['num_runs'].append(1)
     # use df_timingfile datafram read from previous timing
-    elif generate_baseline == True:
+    elif generate_baseline == True and baseline_average == True:
         m = np.where(df_timingfile['command']==mycmd)
+        if (m[0].size == 0):
+            print("null value found, timingfile does not have the command: \n", mycmd)
+            print("Recreate baselines. exiting..")
+            raise
+            # exit()
         val=(m[0]).item()
 
         # update the loaded file dataframe to put average time and number of runs for the command
@@ -326,12 +336,19 @@ def generate_mesh(meshstr):
 
     return command, filename
 
-def check_error(success):
-    if False in success:
+def check_error(success, results):
+    if (False in success):
        print("exiting..")
        print("Find usage by running: \npython regression_tests.py -h\n")
-
-       exit()   
+       raise
+    # scan for "Error:" in results string
+    for i in results:
+        for j in i:
+            if "Error:" in j:
+                print("exiting..")
+                print("Find usage by running: \npython regression_tests.py -h\n")
+                raise  
+    #    exit()   
 
 if __name__ == '__main__':
 
@@ -344,6 +361,7 @@ if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
     parser.add_argument("-g", "--generate_baseline", help="Generate new baseline for comparison (regression) later", action = "store_true")
+    parser.add_argument("-u", "--baseline_average", help="Don't average baseline with previous runs", action = "store_true")    
     parser.add_argument("-p", "--path", type=str, help="run parallel tests", default="../bin")
     parser.add_argument("-n", "--procs", type=int, help="number of processors used for running regression tests",default=2)
 
@@ -363,7 +381,12 @@ if __name__ == '__main__':
     if args.path:
         print("executable path specified =", args.path)
         bin_path=args.path
+    if args.baseline_average:
+        baseline_average=True
+        print("average from previous baseline:", baseline_average)
 
+    # open the timingfile
+    time_file, timing_objects, df_timingfile = open_timingfile(baseline_average)
 
     # Run a pipeline
     # read inputs
@@ -482,12 +505,13 @@ if __name__ == '__main__':
         populate_timing_data(mesh_cmds[count], timeDelta, splitLoc)
         count=count+1
         if verbose:
-            print("\n===================================\n")
-            print(result)
-            print("\n===================================\n")
+           if count == 1:
+              print("\nGENERATE MESH CMDS===================================\n")
+           print(result)
+           print("\n===================================\n")
         results.append(result)
         success.append(ss)
-    check_error(success)
+    check_error(success, results)
     #  
     success = []
     results = []
@@ -498,12 +522,13 @@ if __name__ == '__main__':
        populate_timing_data(generate_test_cmds[count], timeDelta, splitLoc)
        count=count+1
        if verbose:
-           print("\n===================================\n")
+           if count == 1:
+             print("\nGENERATE TEST CMDS===================================\n")
            print(result)
            print("\n===================================\n")
        results.append(result)
        success.append(ss)    
-    check_error(success)
+    check_error(success, results)
     #
     success = []
     results = [] 
@@ -514,12 +539,13 @@ if __name__ == '__main__':
        populate_timing_data(overlap_test_cmds[count], timeDelta, splitLoc)
        count=count+1
        if verbose:
-           print("\n===================================\n")
+           if count == 1:
+             print("\nGENERATE OVERLAP TEST CMDS===================================\n")
            print(result)
            print("\n===================================\n")
        results.append(result)
        success.append(ss)    
-    check_error(success)
+    check_error(success, results)
     # 
     success = []
     results = []    
@@ -530,12 +556,13 @@ if __name__ == '__main__':
        populate_timing_data(g_offmap_cmds[count], timeDelta, splitLoc)
        count=count+1
        if verbose:
-           print("\n===================================\n")
+           if count == 1:
+             print("\nGENERATE OFFLINE MAP===================================\n")
            print(result)
            print("\n===================================\n")
        results.append(result)
        success.append(ss)    
-    check_error(success)
+    check_error(success, results)
     # 
     success = []
     results = []   
@@ -546,12 +573,13 @@ if __name__ == '__main__':
        populate_timing_data(a_offmap_cmds[count], timeDelta, splitLoc)
        count=count+1
        if verbose:
-           print("\n===================================\n")
+           if count == 1:
+             print("\nAPPLY OFFLINE MAP CMDS===================================\n")
            print(result)
            print("\n===================================\n")
        results.append(result)
        success.append(ss)       
-    check_error(success)
+    check_error(success, results)
     #  print(results)
     pool.close()
     pool.join()
@@ -578,8 +606,8 @@ if __name__ == '__main__':
         print("\n Saved baseline/baseline_data.pkl file")
 
         # write current results to a file
-        #  check if objects populated from existing timing file is available
-        if objects == []:
+        #  check if timing_objects populated from existing timing file is available
+        if timing_objects == []:
             df_t = pd.DataFrame(timing_dict)
             pickle.dump(df_t, time_file)
             print("\n Saved baseline/timing_data.pkl file")
@@ -642,6 +670,10 @@ if __name__ == '__main__':
         print(df_timingfile['average_time'][0])
         for j in range(dlength):
             m = np.where(df_timingfile['command']==timing_dict['command'][j])
+            if (m[0].size == 0):
+                print("null value found, baseline does not have the command: \n", timing_dict['command'][j])
+                print("Recreate baselines. exiting..")
+                exit()
             # assuming there are no repetitions and there is one unique cmd
             val=np.asscalar(m[0])
             # print(val)
