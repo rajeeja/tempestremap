@@ -93,5 +93,6 @@ jobs:
         export DYLD_LIBRARY_PATH=/Users/runner/miniconda3/envs/test-environment/lib:$DYLD_LIBRARY_PATH
         PATH=$HOME/tr_install/bin:$PATH
         cd regression_tests
+        LD_RUNPATH_SEARCH_PATH=/Users/runner/miniconda3/envs/test-environment/lib/:$LD_RUNPATH_SEARCH_PATH
         python regression_tests.py -v -p $HOME/tr_install/bin/ -n 4
 
