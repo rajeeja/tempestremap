@@ -1,15 +1,14 @@
 # This is a basic workflow that is manually triggered
 name: Manual workflow
 on:
+  # Controls when the action will run. Workflow runs when manually triggered using the UI
+  # or API.
   workflow_dispatch:
 
   pull_request:
     branches: [ master ]
   push:
     branches: [ master ]  
-
-Controls when the action will run. Workflow runs when manually triggered using the UI
-or API.
 
 jobs:
   regression-tempestremap:
