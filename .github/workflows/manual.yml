@@ -94,7 +94,7 @@ jobs:
         install_name_tool -add_rpath '/Users/runner/miniconda3/envs/test-environment/lib/' $HOME/tr_install/bin/GenerateCSMesh
         install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateCSMesh
         # 
-        install_name_tool -add_rpath '/Users/runner/miniconda3/envs/test-environment/lib/' '@rpath/libnetcdf.19.dylib' $HOME/tr_install/bin/GenerateRLLMesh
+        install_name_tool -add_rpath '/Users/runner/miniconda3/envs/test-environment/lib/' $HOME/tr_install/bin/GenerateRLLMesh
         install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateRLLMesh
         # 
         otool -l $HOME/tr_install/bin/GenerateRLLMesh
