@@ -80,6 +80,7 @@ jobs:
         which python
         ls -ltrh
         which autoreconf
+        install_name_tool -change @rpath/libnetcdf.19.dylib  /Users/runner/miniconda3/envs/test-environment/lib/libnetcdf.19.dylib 
         autoreconf -fi
         ./configure --prefix=$HOME/tr_install --with-netcdf=/Users/runner/miniconda3/envs/test-environment --with-hdf5=/Users/runner/miniconda3/envs/test-environment --with-netcdf-include=/Users/runner/miniconda3/envs/test-environment/include --with-netcdf-lib=/Users/runner/miniconda3/envs/test-environment/lib --disable-shared --enable-static
         make -j
@@ -91,8 +92,8 @@ jobs:
         echo $HOME
         ls -ltrh /Users/runner/miniconda3/envs/test-environment/lib/
         export DYLD_LIBRARY_PATH=/Users/runner/miniconda3/envs/test-environment/lib:$DYLD_LIBRARY_PATH
+        install_name_tool -change @rpath/libnetcdf.19.dylib  /Users/runner/miniconda3/envs/test-environment/lib/libnetcdf.19.dylib 
         PATH=$HOME/tr_install/bin:$PATH
         cd regression_tests
-        export LD_RUNPATH_SEARCH_PATH=/Users/runner/miniconda3/envs/test-environment/lib/:$LD_RUNPATH_SEARCH_PATH
         python regression_tests.py -v -p $HOME/tr_install/bin/ -n 4
 
