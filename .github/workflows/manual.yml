@@ -80,9 +80,8 @@ jobs:
         which python
         ls -ltrh
         which autoreconf
-        install_name_tool -id @rpath/libnetcdf.19.dylib  /Users/runner/miniconda3/envs/test-environment/lib/libnetcdf.19.dylib 
         autoreconf -fi
-        ./configure --prefix=$HOME/tr_install --with-netcdf=/Users/runner/miniconda3/envs/test-environment --with-hdf5=/Users/runner/miniconda3/envs/test-environment --with-netcdf-include=/Users/runner/miniconda3/envs/test-environment/include --with-netcdf-lib=/Users/runner/miniconda3/envs/test-environment/lib --disable-shared --enable-static
+        ./configure --prefix=$HOME/tr_install --with-netcdf=/Users/runner/miniconda3/envs/test-environment --with-hdf5=/Users/runner/miniconda3/envs/test-environment --with-netcdf-include=/Users/runner/miniconda3/envs/test-environment/include --with-netcdf-lib=/Users/runner/miniconda3/envs/test-environment/lib 
         make -j
         make install
     - name: OSX Run Regression
@@ -92,7 +91,24 @@ jobs:
         echo $HOME
         ls -ltrh /Users/runner/miniconda3/envs/test-environment/lib/
         export DYLD_LIBRARY_PATH=/Users/runner/miniconda3/envs/test-environment/lib:$DYLD_LIBRARY_PATH
-        install_name_tool -id @rpath/libnetcdf.19.dylib  /Users/runner/miniconda3/envs/test-environment/lib/libnetcdf.19.dylib 
+        # stuff for osx
+        install_name_tool -id '@rpath/libnetcdf.19.dylib'  /Users/runner/miniconda3/envs/test-environment/lib/libnetcdf.19.dylib 
+        # 
+        install_name_tool -change 'libnetcdf.19.dylib' '@rpath/libnetcdf.19.dylib' $HOME/tr_install/bin/GenerateICOMesh
+        install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateICOMesh
+        # 
+        install_name_tool -change 'libnetcdf.19.dylib' '@rpath/libnetcdf.19.dylib' $HOME/tr_install/bin/GenerateCSMesh
+        install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateCSMesh
+        # 
+        install_name_tool -change 'libnetcdf.19.dylib' '@rpath/libnetcdf.19.dylib' $HOME/tr_install/bin/GenerateRLLMesh
+        install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateRLLMesh
+        # 
+        install_name_tool -change 'libnetcdf.19.dylib' '@rpath/libnetcdf.19.dylib' $HOME/tr_install/bin/GenerateOfflineMap
+        install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateOfflineMap
+        # 
+        install_name_tool -change 'libnetcdf.19.dylib' '@rpath/libnetcdf.19.dylib' $HOME/tr_install/bin/GenerateTestData
+        install_name_tool -add_rpath '@executable_path' $HOME/tr_install/bin/GenerateTestData
+        #
         PATH=$HOME/tr_install/bin:$PATH
         cd regression_tests
         python regression_tests.py -v -p $HOME/tr_install/bin/ -n 4
