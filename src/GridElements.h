@@ -682,7 +682,7 @@ public:
 	///	<summary>
 	///		Vector storing mask variable for this mesh.
 	///	</summary>
-	DataArray1D<int> vecMask;
+	std::vector<int> vecMask;
 
 	///	<summary>
 	///		EdgeMap for this mesh.
@@ -699,6 +699,16 @@ public:
 	///		the original mesh has been subdivided).
 	///	</summary>
 	std::vector<int> vecMultiFaceMap;
+
+	///	<summary>
+	///		Grid dimensions.
+	///	</sumamry>
+	std::vector<int> vecGridDimSize;
+
+	///	<summary>
+	///		Grid dimension names.
+	///	</sumamry>
+	std::vector<std::string> vecGridDimName;
 
 public:
 	///	<summary>
@@ -1022,6 +1032,14 @@ Real CalculateFaceArea(
 	const NodeVector & nodes
 );
 
+/// <summary>
+///     Calculate triangle area, quadrature.
+/// </summary>
+Real CalculateTriangleAreaQuadratureMethod(
+	Node &node1,
+	Node &node2,
+	Node &node3
+);
 ///////////////////////////////////////////////////////////////////////////////
 
 ///	<summary>
